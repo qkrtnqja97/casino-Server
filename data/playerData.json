@@ -1,0 +1,27 @@
+{
+    "user1": {
+      "nickname": "Alice",
+      "password": "1234",
+      "balance": 10,
+      "ticket": 20
+    },
+    "user2": {
+      "nickname": "Duygu",
+      "password": "2345",
+      "balance": 10,
+      "ticket": 14
+    },
+    "user3": {
+      "nickname": "Soobeom",
+      "password": "3456",
+      "balance": 10,
+      "ticket": 3
+    },
+    "user4": {
+      "nickname": "Dougal",
+      "password": "3456",
+      "balance": 10,
+      "ticket": 3
+    }
+  }
+    
