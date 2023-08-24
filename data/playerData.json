@@ -2,26 +2,26 @@
     "user1": {
       "nickname": "Alice",
       "password": "1234",
-      "balance": 10,
+      "balance": 150,
       "ticket": 20
     },
     "user2": {
       "nickname": "Duygu",
       "password": "2345",
-      "balance": 10,
-      "ticket": 14
+      "balance": 100,
+      "ticket": 50
     },
     "user3": {
       "nickname": "Soobeom",
       "password": "3456",
-      "balance": 10,
-      "ticket": 3
+      "balance": 70,
+      "ticket": 14
     },
     "user4": {
       "nickname": "Dougal",
-      "password": "3456",
-      "balance": 10,
-      "ticket": 3
+      "password": "4567",
+      "balance": 50,
+      "ticket": 130
     }
   }
     
