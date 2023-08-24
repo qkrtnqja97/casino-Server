@@ -17,10 +17,11 @@ async function updateUserTicket(username,ticket) {
     fs.writeFileSync(userData, JSON.stringify(users, null, 2));
 }
 
-async function authenticateUser(req) {
+async function authenticateUser(request) {
     // get the value for the 'username' and 'password'
     // keys from the request query string
-    const { username, password } = req.query;
+    const username = request.username;
+    const password = request.password;
 
     return new Promise((resolve, reject) => {
         fs.readFile(userData, 'utf-8', (err, fileData) => {

@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const app = express();
-const port = 3000;
+const port = 9000;
 const textBodyParser = bodyParser.text({ limit: '20mb', defaultCharset: 'utf-8' });
 
 // Import our custom modules here:
@@ -14,21 +14,23 @@ const { getRandomLeg, getRandomStart } = require('./my_modules/utility.js');
                 getCurrentUser,
                 updateUserTicket,
                 addUser } = require('./my_modules/login.js');
+const { allowedNodeEnvironmentFlags } = require('process');
 
 app.use(cors({
-  origin: 'http://localhost:9000'
+  origin: 'http://localhost:3000'
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.options('/utility', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5000');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.header('Access-Control-Allow-Headers', 'task');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Methods', 'POST');
   res.sendStatus(200);
 });
+
 
 app.get('/getUserData', textBodyParser, async function (req,res) {
     console.log('req.headers: ', req.headers); 
@@ -82,7 +84,7 @@ app.get('/ghostleg', textBodyParser, async function (req, res){
     }
 })
 
-app.get('/login', textBodyParser, async function (req, res) {
+app.post('/login', textBodyParser, async function (req, res) {
     // print the HTTP Request Headers
     console.log('req.headers: ', req.headers); 
 
@@ -94,9 +96,12 @@ app.get('/login', textBodyParser, async function (req, res) {
     // TASK Check
     if (reqTask === 'login') {
         try {
-            const loginResult = await authenticateUser(req);
-            console.log('req.query: ',req.query);
+            request = JSON.parse(req.body);
+            console.log('req.body: ',req.body);
+            console.log('username: ', request.username);
+            const loginResult = await authenticateUser(request);
             console.log('authenticateUser() result: ', loginResult);
+
 
             if (loginResult == true) {
                 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -104,13 +109,13 @@ app.get('/login', textBodyParser, async function (req, res) {
                 res.setHeader('Access-Control-Expose-Headers', 'request-result'); 
                 // set the custom header 'request-result'
                 res.setHeader('request-result', 'Request ' + req.method + ' was received successfully.');
-                res.status(200).send("Login Successful");
+                res.status(200).json({message:"Login Successful"});
             } else {
-                res.status(403).send("Login Failed"); // 403 Forbidden Access
+                res.status(403).json({message:"Login Failed"}); // 403 Forbidden Access
             }
         } catch (error) {
             console.log('authenticateUser() error:', error);
-            res.status(500).send("Server Error");
+            res.status(500).json({message:"Server Error"});
         }
     }
 
@@ -162,6 +167,7 @@ app.post('/plusTicket', async function(req, res) {
     }
 })
 
+/*
 app.post('/login', async function (req, res) {
     // print the HTTP Request Headers
    console.log('req.headers: ', req.headers); 
@@ -189,7 +195,7 @@ app.post('/login', async function (req, res) {
        }
    }
 });
-
+*/
 
 app.listen(port, (err) => {
   if (err) {
