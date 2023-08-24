@@ -22,7 +22,7 @@ async function authenticateUser(request) {
     // keys from the request query string
     const username = request.username;
     const password = request.password;
-
+    
     return new Promise((resolve, reject) => {
         fs.readFile(userData, 'utf-8', (err, fileData) => {
             if (err) {

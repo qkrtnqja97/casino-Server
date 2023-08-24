@@ -14,6 +14,7 @@ const { getRandomLeg, getRandomStart, rollTheDice, calculateWinner, getSpinRoule
                 getCurrentUser,
                 updateUserTicket,
                 addUser } = require('./my_modules/login.js');
+const { json } = require('express');
 
        
 
@@ -74,36 +75,9 @@ app.get('/getUserRoulette', textBodyParser, async function (req,res) {
 })
 
 
-app.get('/ghostleg', textBodyParser, async function (req, res){
-    console.log('req.headers: ' , req.headers);
-
-    const reqOrigin = req.headers['origin']; // get the origin of the request
-    const reqTask = req.headers['task']; // get the task of the request
-
-    console.log("Processing request from " + reqOrigin + " for route " + req.url + " with method " + req.method + " for task: " + reqTask);
-    console.log("ghostLeg start");
-    //Task Check
-    if (reqTask === 'ghostleg') {
-        try{
-            console.log('try');
-            heightNode = getRandomLeg();
-            startPoint = getRandomStart();
-            console.log('heightNode: ',heightNode);
-            console.log('startPoint: ',startPoint);
-            res.status(200).json({heightNode,startPoint});
-            console.log('successful');
-        } catch (error) {
-            console.log('authenticateUser() error:', error);
-            res.status(500).send("Server Error");
-        }
-    }
-})
-
-
-app.get('/login', textBodyParser, async function (req, res) {
+app.post('/login', textBodyParser, async function (req, res) {
     // print the HTTP Request Headers
     console.log('req.headers: ', req.headers); 
-
     const reqOrigin = req.headers['origin']; // get the origin of the request
     const reqTask = req.headers['task']; // get the task of the request
 
@@ -112,8 +86,11 @@ app.get('/login', textBodyParser, async function (req, res) {
     // TASK Check
     if (reqTask === 'login') {
         try {
-            const loginResult = await authenticateUser(req);
-            console.log('req.query: ',req.query);
+            console.log('req.query: ',req.body);
+            let request = JSON.parse(req.body);
+            console.log(request);
+            console.log(request.username);
+            const loginResult = await authenticateUser(request);
             console.log('authenticateUser() result: ', loginResult);
 
             if (loginResult == true) {
@@ -122,13 +99,13 @@ app.get('/login', textBodyParser, async function (req, res) {
                 res.setHeader('Access-Control-Expose-Headers', 'request-result'); 
                 // set the custom header 'request-result'
                 res.setHeader('request-result', 'Request ' + req.method + ' was received successfully.');
-                res.status(200).send("Login Successful");
+                res.status(200).json({message:"Login Successful"});
             } else {
-                res.status(403).send("Login Failed"); // 403 Forbidden Access
+                res.status(403).jdon({message:"Login Failed"}); // 403 Forbidden Access
             }
         } catch (error) {
             console.log('authenticateUser() error:', error);
-            res.status(500).send("Server Error");
+            res.status(500).json({message:"Server Error"});
         }
     }
 
