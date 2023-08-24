@@ -4,21 +4,18 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const app = express();
-
 const port = 8000;
-
 const textBodyParser = bodyParser.text({ limit: '20mb', defaultCharset: 'utf-8' });
 
 // Import our custom modules here:
-const { getRandomLeg, getRandomStart } = require('./my_modules/utility.js');
+const { getRandomLeg, getRandomStart, rollTheDice, calculateWinner, getSpinRoulette } = require('./my_modules/utility.js');
 
         const { authenticateUser,
                 getCurrentUser,
                 updateUserTicket,
                 addUser } = require('./my_modules/login.js');
-const { allowedNodeEnvironmentFlags } = require('process');
 
-        const { getSpinRoulette} = require('./utility.js');
+       
 
 app.use(cors({
   origin: 'http://localhost:3000'
@@ -28,13 +25,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.options('/utility', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8000');
   res.header('Access-Control-Allow-Headers', 'task');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Methods', 'POST');
   res.sendStatus(200);
 });
-
 
 app.get('/getUserData', textBodyParser, async function (req,res) {
     console.log('req.headers: ', req.headers); 
@@ -77,7 +73,33 @@ app.get('/getUserRoulette', textBodyParser, async function (req,res) {
     }
 })
 
-app.post('/login', textBodyParser, async function (req, res) {
+
+app.get('/ghostleg', textBodyParser, async function (req, res){
+    console.log('req.headers: ' , req.headers);
+
+    const reqOrigin = req.headers['origin']; // get the origin of the request
+    const reqTask = req.headers['task']; // get the task of the request
+
+    console.log("Processing request from " + reqOrigin + " for route " + req.url + " with method " + req.method + " for task: " + reqTask);
+    console.log("ghostLeg start");
+    //Task Check
+    if (reqTask === 'ghostleg') {
+        try{
+            console.log('try');
+            heightNode = getRandomLeg();
+            startPoint = getRandomStart();
+            console.log('heightNode: ',heightNode);
+            console.log('startPoint: ',startPoint);
+            res.status(200).json({heightNode,startPoint});
+            console.log('successful');
+        } catch (error) {
+            console.log('authenticateUser() error:', error);
+            res.status(500).send("Server Error");
+        }
+    }
+})
+
+app.get('/login', textBodyParser, async function (req, res) {
     // print the HTTP Request Headers
     console.log('req.headers: ', req.headers); 
 
@@ -89,12 +111,9 @@ app.post('/login', textBodyParser, async function (req, res) {
     // TASK Check
     if (reqTask === 'login') {
         try {
-            request = JSON.parse(req.body);
-            console.log('req.body: ',req.body);
-            console.log('username: ', request.username);
-            const loginResult = await authenticateUser(request);
+            const loginResult = await authenticateUser(req);
+            console.log('req.query: ',req.query);
             console.log('authenticateUser() result: ', loginResult);
-
 
             if (loginResult == true) {
                 res.setHeader('Access-Control-Allow-Origin', '*');
@@ -102,13 +121,13 @@ app.post('/login', textBodyParser, async function (req, res) {
                 res.setHeader('Access-Control-Expose-Headers', 'request-result'); 
                 // set the custom header 'request-result'
                 res.setHeader('request-result', 'Request ' + req.method + ' was received successfully.');
-                res.status(200).json({message:"Login Successful"});
+                res.status(200).send("Login Successful");
             } else {
-                res.status(403).json({message:"Login Failed"}); // 403 Forbidden Access
+                res.status(403).send("Login Failed"); // 403 Forbidden Access
             }
         } catch (error) {
             console.log('authenticateUser() error:', error);
-            res.status(500).json({message:"Server Error"});
+            res.status(500).send("Server Error");
         }
     }
 
@@ -160,7 +179,6 @@ app.post('/plusTicket', async function(req, res) {
     }
 })
 
-/*
 app.post('/login', async function (req, res) {
     // print the HTTP Request Headers
    console.log('req.headers: ', req.headers); 
@@ -188,7 +206,31 @@ app.post('/login', async function (req, res) {
        }
    }
 });
-*/
+
+app.get('/duygu', async function (req, res) {
+    console.log('req.headers: ', req.headers);
+  
+    const reqOrigin = req.headers['origin'];
+    const reqTask = req.headers['task'];
+  
+    console.log("Processing request from " + reqOrigin + " for route " + req.url + " with method " + req.method + " for task: " + reqTask);
+  
+    if (reqTask === 'duygu') { 
+      try {
+        const result = rollTheDice();
+        const winner = calculateWinner(result.randomNumber1, result.randomNumber2);
+        res.status(200).json({ roll: result, result: winner });
+      } catch (error) {
+        console.log('Error:', error);
+        console.log('Request headers:', req.headers);
+        res.status(500).json({ error: 'An error occurred' });
+      }
+    } else {
+      res.status(400).json({ error: 'Invalid task' }); // Return a 400 Bad Request status
+    }
+  });
+  
+
 
 app.listen(port, (err) => {
   if (err) {
