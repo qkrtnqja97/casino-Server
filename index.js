@@ -77,32 +77,6 @@ app.get('/getUserRoulette', textBodyParser, async function (req,res) {
     }
 })
 
-
-app.get('/ghostleg', textBodyParser, async function (req, res){
-    console.log('req.headers: ' , req.headers);
-
-    const reqOrigin = req.headers['origin']; // get the origin of the request
-    const reqTask = req.headers['task']; // get the task of the request
-
-    console.log("Processing request from " + reqOrigin + " for route " + req.url + " with method " + req.method + " for task: " + reqTask);
-    console.log("ghostLeg start");
-    //Task Check
-    if (reqTask === 'ghostleg') {
-        try{
-            console.log('try');
-            heightNode = getRandomLeg();
-            startPoint = getRandomStart();
-            console.log('heightNode: ',heightNode);
-            console.log('startPoint: ',startPoint);
-            res.status(200).json({heightNode,startPoint});
-            console.log('successful');
-        } catch (error) {
-            console.log('authenticateUser() error:', error);
-            res.status(500).send("Server Error");
-        }
-    }
-})
-
 app.post('/login', textBodyParser, async function (req, res) {
     // print the HTTP Request Headers
     console.log('req.headers: ', req.headers); 
