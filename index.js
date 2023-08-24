@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const app = express();
-const port = 3000;
+const port = 8000;
 const textBodyParser = bodyParser.text({ limit: '20mb', defaultCharset: 'utf-8' });
 
 // Import our custom modules here:
@@ -15,15 +15,17 @@ const { getRandomLeg, getRandomStart } = require('./my_modules/utility.js');
                 updateUserTicket,
                 addUser } = require('./my_modules/login.js');
 
+        const { getSpinRoulette} = require('./utility.js');
+
 app.use(cors({
-  origin: 'http://localhost:9000'
+  origin: 'http://localhost:3000'
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.options('/utility', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5000');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.header('Access-Control-Allow-Headers', 'task');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Allow-Methods', 'POST');
@@ -53,9 +55,24 @@ app.get('/getUserData', textBodyParser, async function (req,res) {
             es.status(500).send("Server Error");
         }
         
-        
     }
 })
+
+app.get('/getUserRoulette', textBodyParser, async function (req,res) {
+    console.log('req.headers: ', req.headers); 
+
+    const reqOrigin = req.headers['origin']; // get the origin of the request
+    const reqTask = req.headers['task']; // get the task of the request
+
+    console.log("Processing request from " + reqOrigin + " for route " + req.url + " with method " + req.method + " for task: " + reqTask);
+
+
+    if (reqTask === 'spin') {
+        getSpin = getSpinRoulette();
+        res.status(200).json({ getSpin });
+    }
+})
+
 
 app.get('/ghostleg', textBodyParser, async function (req, res){
     console.log('req.headers: ' , req.headers);
